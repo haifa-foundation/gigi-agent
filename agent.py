@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import abc
 import json
+import re
 from math import sqrt
 
 from config import UPDATE_FREQUENCY, HALSEY_API_URL
@@ -19,7 +20,7 @@ class GigiAgent(object):
     IDS_DELTA_THRESHOLD = 1
     QOS_THRESHOLD = 0.0
 
-    def __init__(self, h1_ip, h1_name, h2_ip, h2_name):
+    def __init__(self, h1_ip, h2_ip):
         super().__init__()
         self.last_ids_cid = 0
         self.last_ips_cid = 0
@@ -27,8 +28,6 @@ class GigiAgent(object):
         self.h2_history = []
         self.h1_ip = h1_ip
         self.h2_ip = h2_ip
-        self.h1_name = h1_name
-        self.h2_name = h2_name
 
     def iter(self):
         pass
@@ -61,12 +60,6 @@ class GigiAgent(object):
     def _h2_ip(self):
         return self.h2_ip
 
-    def _h1_name(self):
-        return self.h1_name
-
-    def _h2_name(self):
-        return self.h1_name
-
     def _is_hist_down(self, hist):
         if len(hist) == 0:
             return False
@@ -75,10 +68,21 @@ class GigiAgent(object):
         return hist[-1] - avg(hist) / sd(hist) < GigiAgent.IDS_DELTA_THRESHOLD
 
     def _qos_index(self, info_dict):
-        return 0
+        return float(info_dict["insight"])
 
     def is_qos_good(self, qos):
         return qos >= GigiAgent.QOS_THRESHOLD
+
+    def _fetch_attack_stats(self):
+        """
+        Cycles through hosts and If the host is an attacker instance
+        or what we call a malicious host then it reports back on the
+        failures/successes of the attack or in other words if the
+        attack is being suppressed in anyway.
+        """
+        r = requests.get(GigiAgent.STATS)
+        r.raise_for_status()
+        return json.loads(r.text)
 
     def toggle(self, hostname):
         """
@@ -104,18 +108,7 @@ class GigiAgent(object):
         return int(self._is_hist_down(h1_hist)) * 1 + \
             int(self._is_hist_down(h2_hist) * 2)
 
-    def get_attack_stats(self):
-        """
-        Cycles through hosts and If the host is an attacker instance
-        or what we call a malicious host then it reports back on the
-        failures/successes of the attack or in other words if the
-        attack is being suppressed in anyway.
-        """
-        r = requests.get(GigiAgent.STATS)
-        r.raise_for_status()
-        return json.loads(r.text)
-
-    def get_qos_score(self):
+    def get_reward(self):
         """
         Reads QOS metrics for hosts and returns a score
         Gives a score [-1,+1] that shows better score
@@ -125,17 +118,19 @@ class GigiAgent(object):
             #-1 for h1 QOS good and h2 QOS bad
         """
         qos_data = self._fetch_qos()
-        qos_flat = {d["name"]: d for d in qos_data["benign"] + qos_data["malicious"]}
+        attack_data = self._fetch_attack_stats()
 
-        h1_qos_index = self._qos_index(qos_flat[self._h1_name()])
-        h2_qos_index = self._qos_index(qos_flat[self._h2_name()])
+        avg = lambda l: sum(l) / len(l)
+        nw_score = lambda l: avg([self._qos_index(d) for d in l])
 
-        h1_ok = self.is_qos_good(h1_qos_index)
-        h2_ok = self.is_qos_good(h2_qos_index)
+        failrate = lambda stat: re.match(r"failure rate\s*=\s*(.+)f\s*,", stat).group(1).replace(",", ".")
+        attack_score = avg([float(failrate(d["stats"])) for d in attack_data])
 
-        return [[-0.3, 1], [-1, -0.3]][int(h1_ok)][int(h2_ok)]
+        scale = lambda x: -1 + 1.3 * (x+1)
+
+        return scale(nw_score(qos_data["benign"]) - nw_score(qos_data["malicious"]) + 1.6 * attack_score)
 
 
 if __name__ == "__main__":
-    agent = GigiAgent()
-    agent.start()
+    agent = GigiAgent(None, None)
+    print(agent.get_reward())
