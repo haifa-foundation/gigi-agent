@@ -93,7 +93,7 @@ class GigiAgent(object):
         r.raise_for_status()
         return 1
 
-    def get_ids_ips_occurences(self):
+    def get_ids_ips_occurrences(self):
         """
         Reads IPS alerts/logs from a SQL DB running connected in real time
         to the logs from the IPS deployed on the VN Benign
@@ -103,8 +103,8 @@ class GigiAgent(object):
         Return 3 if down  for h1 and h2
         """
         hist = self._fetch_hist()
-        h1_hist = [d['frequency'] for d in hist if self.h1_ip in d.values()]
-        h2_hist = [d['frequency'] for d in hist if self.h2_ip in d.values()]
+        h1_hist = [d["frequency"] for d in hist if self.h1_ip in d.values()]
+        h2_hist = [d["frequency"] for d in hist if self.h2_ip in d.values()]
         return int(self._is_hist_down(h1_hist)) * 1 + \
             int(self._is_hist_down(h2_hist) * 2)
 
@@ -133,4 +133,4 @@ class GigiAgent(object):
 
 if __name__ == "__main__":
     agent = GigiAgent(None, None)
-    print(agent.get_reward())
+    print(agent.toggle("bella-h1"))
