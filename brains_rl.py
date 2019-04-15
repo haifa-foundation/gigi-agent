@@ -1,6 +1,7 @@
+#import World
 import threading
 import time
-
+import agent
 score =1 
 state =(3,3)
 
@@ -62,10 +63,11 @@ Q = {}
 discount = 0.3
 actions = ["toggle_h1","toggle_h2", "nothing"] #World.actions
 states = [(0,3),(1,2),(1,3),(2,1),(2,3),(3,0),(3,1),(3,2),(3,3)]
+#states=[] 
 #for i in range(4):#World.x):
 #    for j in range(4):#(World.y):
 #        if (makessense(i,j)):
-#			states.append((i, j)) #create a list of all possible states 
+#		states.append((i, j)) #create a list of all possible states 
 
 for state in states:
     temp = {}
@@ -104,7 +106,7 @@ def GET_IDS_occurrences ():
 	Return 2 if down for h1 and up for h2 
 	Return 3 if down  for h1 and h2 
 	'''
-	return 1
+	return 2
 
 def GET_IPS_occurrences (): 
 	'''
@@ -115,7 +117,7 @@ def GET_IPS_occurrences ():
 	Return 3 if down  for h1 and h2 
 
 	'''
-	return 1
+	return 3
 
 
 def update_state(): 
@@ -123,7 +125,7 @@ def update_state():
 	# return a tuple of two numbers 
 	# example = (0,0) == IDS--h1u--h2u, IPS--h1u--h2u ## BOTH ATTACKING IDS & IPS  
 	d = GET_IDS_occurrences ()
-	p = GET_IDS_occurrences ()
+	p = GET_IPS_occurrences ()	
 	new_state = (d,p)
 	
 	reward() #update the score for this round 
@@ -169,7 +171,6 @@ def do_action(action):
     #    World.try_move(1, 0)
     else:
         print "do nothing" 
-        return
     s2 = update_state() 
     r += score
     return s, action, r, s2
