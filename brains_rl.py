@@ -1,17 +1,28 @@
 #import World
 import threading
 import time
-import agent
+from agent import GigiAgent
+
+
+
 score =1 
 state =(3,3)
-
 init_VN_h1="VNB"
 init_VN_h2="VNB"
 curr_VN_h1="VNB"
 curr_VN_h2="VNB"
 
 #h1 is attacker 
+h1_oip= "210.0.0.61"
+h1_pip= "10.142.15.215" 
+h1_name="bella-h7" 
+
 #h2 is benign 
+h2_oip= "210.0.0.53"
+h2_pip= "10.142.15.209"
+h2_name="bella-h3"
+
+a=GigiAgent(h1_oip, h2_oip) 
 #both start on vnb 
 ''' --- STATES ---
 
@@ -83,7 +94,7 @@ for (i, j, c, w) in specials: #World.specials:
 
 def toggle (h): 
 	global curr_VN_h1, curr_VN_h2
-	print "-- toggle = " + h
+	print ("-- toggle = " + h)
 	#iman fuck u 
 	#please implement the toggle function api call here sir 
 	#h will be "h1" or "h2"
@@ -97,6 +108,7 @@ def toggle (h):
 			curr_VN_h2 = "VNB"
 		elif curr_VN_h2 == "VNB": 
 			curr_VN_h2 = "VNM"
+	a.toggle(h)
 
 def GET_IDS_occurrences (): 
 	'''
@@ -144,33 +156,33 @@ def reward():
 		if state == (i,j):
 			score += w
 			if score > 0:
-				print "Success! score: ", score
+				print ("Success! score: " + score)
 				restart_net()
 			else:
-				print "Fail! score: ", score
+				print ("Fail! score: "+  score)
 				restart_net()
 
 def restart_net(): 
-	print "========= RESTARTEDDDDD =========" 
+	print ("========= RESTARTEDDDDD =========" )
 	#restarts state 
-	if init_VN_h1 != curr_VN_h1: toggle("h1") 
-	if init_VN_h2 != curr_VN_h2: toggle("h2") 
+	if init_VN_h1 != curr_VN_h1: toggle(h1_name) 
+	if init_VN_h2 != curr_VN_h2: toggle(h2_name) 
 	
 def do_action(action):
     s = state #World.player
     r = -score #-World.score
     if action == actions[0]:
-        toggle("h1")
+        toggle(h1_name)
 		#World.try_move(0, -1)
     elif action == actions[1]:
-        toggle("h2") 
+        toggle(h2_name) 
 		#World.try_move(0, 1)
     #elif action == actions[2]:
     #    World.try_move(-1, 0)
     #elif action == actions[3]:
     #    World.try_move(1, 0)
     else:
-        print "do nothing" 
+        print ("do nothing" )
     s2 = update_state() 
     r += score
     return s, action, r, s2
