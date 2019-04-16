@@ -13,7 +13,7 @@ curr_VN_h1="VNB"
 curr_VN_h2="VNB"
 
 #h1 is attacker 
-h1_oip= "210.0.0.61"
+h1_oip= "210.0.0.63"
 h1_pip= "10.142.15.215" 
 h1_name="bella-h7" 
 
@@ -111,6 +111,7 @@ def toggle (h):
 	a.toggle(h)
 
 def GET_IDS_occurrences (): 
+	# gets both ids and ips occurences 
 	'''
 	Reads IDS alerts/logs from a SQL DB running connected in real time to the logs from the IDS deployed on the VN Benign 
 	Return 0 if up for h1 and h2 
@@ -118,9 +119,6 @@ def GET_IDS_occurrences ():
 	Return 2 if down for h1 and up for h2 
 	Return 3 if down  for h1 and h2 
 	'''
-	return 2
-
-def GET_IPS_occurrences (): 
 	'''
 	Reads IPS alerts/logs from a SQL DB running connected in real time to the logs from the IPS deployed on the VN Benign 
 	Return 0 if up for h1 and h2 
@@ -129,7 +127,9 @@ def GET_IPS_occurrences ():
 	Return 3 if down  for h1 and h2 
 
 	'''
-	return 3
+	xxx= a.get_ids_ips_occurrences()
+	print (xxx)
+	return xxx
 
 
 def update_state(): 
@@ -137,8 +137,7 @@ def update_state():
 	# return a tuple of two numbers 
 	# example = (0,0) == IDS--h1u--h2u, IPS--h1u--h2u ## BOTH ATTACKING IDS & IPS  
 	d = GET_IDS_occurrences ()
-	p = GET_IPS_occurrences ()	
-	new_state = (d,p)
+	new_state = d
 	
 	reward() #update the score for this round 
 	return new_state 
@@ -151,7 +150,8 @@ def reward():
 	#
 	# 1 for h2 QOS good and h1 QOS bad 
 	# -0.3 for QOS bad for both or QOS good for both
-	#-1 for h1 QOS good and h2 QOS bad 
+	#-1 for h1 QOS good and h2 QOS bad
+	score+= a.get_reward()   
 	for (i, j, c, w) in specials: 
 		if state == (i,j):
 			score += w
