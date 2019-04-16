@@ -42,8 +42,8 @@ class GigiAgent(object):
             loge("Quitting.")
             exit(0)
 
-    def _fetch_hist(self):
-        r = requests.get(GigiAgent.HIST)
+    def _fetch_hist(self, net):
+        r = requests.get(GigiAgent.HIST + "?net=" + net)
         r.raise_for_status()
         return json.loads(r.text)
 
@@ -93,7 +93,7 @@ class GigiAgent(object):
         r.raise_for_status()
         return 1
 
-    def get_ids_ips_occurrences(self):
+    def _get_ids_ips_occurrences(self, net):
         """
         Reads IPS alerts/logs from a SQL DB running connected in real time
         to the logs from the IPS deployed on the VN Benign
@@ -102,11 +102,14 @@ class GigiAgent(object):
         Return 2 if down for h1 and up for h2
         Return 3 if down  for h1 and h2
         """
-        hist = self._fetch_hist()
+        hist = self._fetch_hist(net)
         h1_hist = [d["frequency"] for d in hist if self.h1_ip in d.values()]
         h2_hist = [d["frequency"] for d in hist if self.h2_ip in d.values()]
         return int(self._is_hist_down(h1_hist)) * 1 + \
-            int(self._is_hist_down(h2_hist) * 2)
+               int(self._is_hist_down(h2_hist) * 2)
+
+    def get_ids_ips_occurrences(self):
+        return self._get_ids_ips_occurrences("ids"), self._get_ids_ips_occurrences("ips")
 
     def get_reward(self):
         """
