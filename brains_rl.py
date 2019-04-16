@@ -9,6 +9,7 @@ score =1
 state =(3,3)
 init_VN_h1="VNB"
 init_VN_h2="VNB"
+
 curr_VN_h1="VNB"
 curr_VN_h2="VNB"
 
@@ -98,6 +99,7 @@ def toggle (h):
 	#iman fuck u 
 	#please implement the toggle function api call here sir 
 	#h will be "h1" or "h2"
+	a.toggle(h, curr_VN_h1 , curr_VN_h2)
 	if h == "h1": 
 		if curr_VN_h1 == "VNM": 
 			curr_VN_h1 = "VNB"
@@ -108,7 +110,6 @@ def toggle (h):
 			curr_VN_h2 = "VNB"
 		elif curr_VN_h2 == "VNB": 
 			curr_VN_h2 = "VNM"
-	a.toggle(h)
 
 def GET_IDS_occurrences (): 
 	# gets both ids and ips occurences 
