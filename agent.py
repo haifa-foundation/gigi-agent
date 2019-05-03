@@ -84,12 +84,12 @@ class GigiAgent(object):
         r.raise_for_status()
         return json.loads(r.text)
 
-    def toggle(self, hostname):
+    def toggle(self, hostmac):
         """
         Moves a host from low security to high security
         and vice versa
         """
-        r = requests.get(GigiAgent.TOGGLE + "?host=" + hostname)
+        r = requests.get(GigiAgent.TOGGLE + "?host=" + hostmac)
         r.raise_for_status()
         return 1
 
