@@ -5,5 +5,5 @@ LOG_LEVEL = DEBUG
 # agent interval (seconds)
 UPDATE_FREQUENCY = 5
 
-HALSEY_API_URL = "http://35.227.51.231:8080"
+HALSEY_API_URL = "http://35.237.200.49:8080"
 
