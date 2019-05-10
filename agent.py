@@ -62,10 +62,10 @@ class GigiAgent(object):
 
     def _is_hist_down(self, hist):
         if len(hist) == 0:
-            return False
+            return True
         avg = lambda l: sum(l)/len(l)
         sd = lambda l: sqrt(avg([x**2 for x in l]) - avg(l)**2)
-        return hist[-1] - avg(hist) / sd(hist) < GigiAgent.IDS_DELTA_THRESHOLD
+        return (hist[-1] - avg(hist)) / sd(hist) < GigiAgent.IDS_DELTA_THRESHOLD
 
     def _qos_index(self, info_dict):
         return float(info_dict["insight"])
