@@ -4,17 +4,12 @@ import time
 from agent import GigiAgent
 
 
-
 score =1 
 state =(3,3)
 init_VN_h1="VNB"
 init_VN_h2="VNB"
 
-curr_VN_h1="VNB"
-curr_VN_h2="VNB"
-
 #h1 is attacker 
-<<<<<<< HEAD
 h1_oip= "210.0.0.102"
 h1_pip= "10.142.15.239" 
 h1_name="rl-h2" 
@@ -23,18 +18,6 @@ h1_name="rl-h2"
 h2_oip= "210.0.0.101"
 h2_pip= "10.142.0.6"
 h2_name="rl-b13"
-=======
-h1_oip= "210.0.0.63"
-h1_pip= "10.142.15.215" 
-h1_name="bella-h7"
-h1_mac="06:61:3d:8b:3b:08" 
-
-#h2 is benign 
-h2_oip= "210.0.0.53"
-h2_pip= "10.142.15.209"
-h2_name="bella-h3"
-h2_mac="22:b2:e2:1f:5b:d9" 
->>>>>>> 3628137b26e765c9092c01402d33130b988b85d8
 
 a=GigiAgent(h1_oip, h2_oip) 
 #both start on vnb 
