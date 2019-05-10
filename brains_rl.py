@@ -14,14 +14,14 @@ curr_VN_h1="VNB"
 curr_VN_h2="VNB"
 
 #h1 is attacker 
-h1_oip= "210.0.0.63"
-h1_pip= "10.142.15.215" 
-h1_name="bella-h7" 
+h1_oip= "210.0.0.102"
+h1_pip= "10.142.15.239" 
+h1_name="rl-h2" 
 
 #h2 is benign 
-h2_oip= "210.0.0.53"
-h2_pip= "10.142.15.209"
-h2_name="bella-h3"
+h2_oip= "210.0.0.101"
+h2_pip= "10.142.0.6"
+h2_name="rl-b13"
 
 a=GigiAgent(h1_oip, h2_oip) 
 #both start on vnb 
