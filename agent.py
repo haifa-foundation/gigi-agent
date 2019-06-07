@@ -17,6 +17,7 @@ class GigiAgent(object):
     STATS = HALSEY_API_URL + "/sim/attack"
     QOS = HALSEY_API_URL + "/sim/qos"
     HIST = HALSEY_API_URL + "/ids/hist"
+    VNET = HALSEY_API_URL + "/vnet/get?host=" 
 
     IDS_DELTA_THRESHOLD = 1
     QOS_THRESHOLD = 0.0
@@ -33,6 +34,11 @@ class GigiAgent(object):
     def iter(self):
         pass
 
+    def _vnet(self, mac): 
+        r = requests.get(GigiAgent.VNET + mac)
+        r.raise_for_status()
+        return json.loads(r.text)
+
     def start(self):
         try:
             while True:
@@ -44,8 +50,8 @@ class GigiAgent(object):
             exit(0)
 
     def _fetch_hist(self, net):
-        time.sleep(2) 
-        r = requests.get(GigiAgent.HIST + "?net=" + net + "&interval=60")
+        time.sleep(5) 
+        r = requests.get(GigiAgent.HIST + "?net=" + net + "&interval=5")
         r.raise_for_status()
         return json.loads(r.text)
 
@@ -72,7 +78,8 @@ class GigiAgent(object):
         sd = lambda l: sqrt(avg([x**2 for x in l]) - avg(l)**2)
 
         print (avg(hist)) 
-        
+ #       iman_bs_var = (hist[-1] - avg(hist)) / sd(hist) 
+#        print (iman_bs_var) 
         return avg(hist) #(hist[-1] - avg(hist)) / sd(hist) < GigiAgent.IDS_DELTA_THRESHOLD
 
     def _qos_index(self, info_dict):
@@ -124,16 +131,20 @@ class GigiAgent(object):
         #print (self.h1_ip) 
         h1up =0 
         h2up=0
-        time.sleep(2) 
+        time.sleep(5) 
         
         f_hist= self._fetch_hist(net) 
         f_h1_hist = [d["frequency"] for d in f_hist if self.h1_ip in d.values()]
         f_h2_hist = [d["frequency"] for d in f_hist if self.h2_ip in d.values()]
 
+        print ("h1 & h2 avgs" ) 
         h1avg = self._is_hist_down(h1_hist) 
+        print ("-") 
         h2avg = self._is_hist_down(h2_hist) 
         
+        print("f_h1 & f_h2 avgs - f is 5 seconds after non f") 
         f_h1avg = self._is_hist_down(f_h1_hist) 
+        print ("-") 
         f_h2avg = self._is_hist_down(f_h2_hist) 
 
 
@@ -144,8 +155,8 @@ class GigiAgent(object):
         if (h2avg > 5):# and f_h2avg >= h2avg):
             h2up =1
 
-        print (h1up) 
-        print( h2up ) 
+#        print (h1up) 
+#        print( h2up ) 
         
         if (h1up ==1 and h2up ==1):
             return 0 
@@ -158,8 +169,22 @@ class GigiAgent(object):
                #int(self._is_hist_down(h2_hist) * 2)
 
     def get_ids_ips_occurrences(self):
-        return self._get_ids_ips_occurrences("ids"), self._get_ids_ips_occurrences("ips")
+        #return self._get_ids_ips_occurrences("ids"), self._get_ids_ips_occurrences("ips")
+        x=  int(self._vnet("0a:a5:a2:89:82:60")["net"][4]) , int(self._vnet("6e:9e:36:73:3b:10")["net"][4] )
+        ## VNet 2 is IPS VNET 1 is IDS 
+        ## h1 , h2 | 1 = IDS ,2 =  IPS 
+        if (x == (2,2)):  
+            return 3,0 
 
+        if (x == (2,1)):  
+            return 2,1
+
+        if (x == (1,1)):  
+            return 0,3
+        if (x == (1,2)):  
+            return 1,2
+        print (x)  
+        return 0,0 
     def get_reward(self):
         """
         Reads QOS metrics for hosts and returns a score
@@ -191,4 +216,9 @@ if __name__ == "__main__":
     agent = GigiAgent("210.0.0.101", "210.0.0.102")
 #    h = agent._fetch_hist("ids") 
 #    print (h) 
-    agent.get_ids_ips_occurrences()
+    print( agent.get_ids_ips_occurrences())
+    #print ("=================== TOGGLE H1 ==============") 
+    #agent.toggle("0a:a5:a2:89:82:60")
+    #print ("=================== TOGGLE DONE ==============") 
+    #time.sleep(5) 
+    #agent.get_ids_ips_occurrences()

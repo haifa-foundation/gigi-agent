@@ -8,7 +8,8 @@ score =1
 state =(3,3)
 init_VN_h1="VNB"
 init_VN_h2="VNB"
-
+curr_VN_h1=init_VN_h1
+curr_VN_h2=init_VN_h2
 #h1 is attacker 
 h1_oip= "210.0.0.101"
 h1_pip= "10.142.0.35" 
@@ -23,6 +24,8 @@ h2_mac="6e:9e:36:73:3b:10"
 
 
 a=GigiAgent(h1_oip, h2_oip) 
+
+
 
 #both start on vnb 
 ''' --- STATES ---
@@ -157,7 +160,8 @@ def reward():
 	for (i, j, c, w) in specials: 
 		if state == (i,j):
 			score += w
-			if score > 0:
+			print ("score= " + str(score)) 
+			if score >0:
 				print ("Success! score: " + score)
 				restart_net()
 			else:
@@ -167,17 +171,17 @@ def reward():
 def restart_net(): 
 	print ("========= RESTARTEDDDDD =========" )
 	#restarts state 
-	if init_VN_h1 != curr_VN_h1: toggle(h1_name) 
-	if init_VN_h2 != curr_VN_h2: toggle(h2_name) 
+	if init_VN_h1 != curr_VN_h1: toggle("h1") 
+	if init_VN_h2 != curr_VN_h2: toggle("h2") 
 	
 def do_action(action):
     s = state #World.player
     r = -score #-World.score
     if action == actions[0]:
-        toggle(h1_name)
+        toggle("h1")
 		#World.try_move(0, -1)
     elif action == actions[1]:
-        toggle(h2_name) 
+        toggle("h2") 
 		#World.try_move(0, 1)
     #elif action == actions[2]:
     #    World.try_move(-1, 0)
