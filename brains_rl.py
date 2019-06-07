@@ -10,14 +10,14 @@ init_VN_h1="VNB"
 init_VN_h2="VNB"
 
 #h1 is attacker 
-h1_oip= "210.0.0.102"
-h1_pip= "10.142.15.239" 
-h1_name="rl-h2" 
+h1_oip= "210.0.0.101"
+h1_pip= "10.142.0.35" 
+h1_name="rbc-h1" 
 
 #h2 is benign 
-h2_oip= "210.0.0.101"
-h2_pip= "10.142.0.6"
-h2_name="rl-b13"
+h2_oip= "210.0.0.102"
+h2_pip= "10.142.0.36"
+h2_name="rbc-h2"
 
 a=GigiAgent(h1_oip, h2_oip) 
 #both start on vnb 
@@ -126,7 +126,7 @@ def GET_IDS_occurrences ():
 
 	'''
 	xxx= a.get_ids_ips_occurrences()
-	print (xxx)
+	print ("STATE= " + str(xxx))
 	return xxx
 
 
@@ -134,7 +134,7 @@ def update_state():
 	#api call to get the status of IDS and IPS 
 	# return a tuple of two numbers 
 	# example = (0,0) == IDS--h1u--h2u, IPS--h1u--h2u ## BOTH ATTACKING IDS & IPS  
-	d = GET_IDS_occurrences ()
+	d = GET_IDS_occurrences () # AM 
 	new_state = d
 	
 	reward() #update the score for this round 
@@ -180,7 +180,7 @@ def do_action(action):
     #elif action == actions[3]:
     #    World.try_move(1, 0)
     else:
-        print ("do nothing" )
+        print ("STATE= do nothing" )
     s2 = update_state() 
     r += score
     return s, action, r, s2

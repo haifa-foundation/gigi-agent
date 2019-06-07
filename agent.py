@@ -3,12 +3,13 @@ import abc
 import json
 import re
 from math import sqrt
-
+import logging 
 from config import UPDATE_FREQUENCY, HALSEY_API_URL
 from utils import loge, logi
 import time
 import requests
-
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 class GigiAgent(object):
 
@@ -43,7 +44,8 @@ class GigiAgent(object):
             exit(0)
 
     def _fetch_hist(self, net):
-        r = requests.get(GigiAgent.HIST + "?net=" + net)
+        time.sleep(2) 
+        r = requests.get(GigiAgent.HIST + "?net=" + net + "&interval=60")
         r.raise_for_status()
         return json.loads(r.text)
 
@@ -62,10 +64,16 @@ class GigiAgent(object):
 
     def _is_hist_down(self, hist):
         if len(hist) == 0:
-            return True
+        #    print ("0= down") 
+            return 0
+        
+        
         avg = lambda l: sum(l)/len(l)
         sd = lambda l: sqrt(avg([x**2 for x in l]) - avg(l)**2)
-        return (hist[-1] - avg(hist)) / sd(hist) < GigiAgent.IDS_DELTA_THRESHOLD
+
+        print (avg(hist)) 
+        
+        return avg(hist) #(hist[-1] - avg(hist)) / sd(hist) < GigiAgent.IDS_DELTA_THRESHOLD
 
     def _qos_index(self, info_dict):
         return float(info_dict["insight"])
@@ -103,10 +111,51 @@ class GigiAgent(object):
         Return 3 if down  for h1 and h2
         """
         hist = self._fetch_hist(net)
+        #print ("hist= ")
+        #print(hist) 
+                
         h1_hist = [d["frequency"] for d in hist if self.h1_ip in d.values()]
         h2_hist = [d["frequency"] for d in hist if self.h2_ip in d.values()]
-        return int(self._is_hist_down(h1_hist)) * 1 + \
-               int(self._is_hist_down(h2_hist) * 2)
+        print(net) 
+        #print ("h1 hist= ")
+        #print(h1_hist)
+        #print ("h2 hist= ")
+        #print( h2_hist)
+        #print (self.h1_ip) 
+        h1up =0 
+        h2up=0
+        time.sleep(2) 
+        
+        f_hist= self._fetch_hist(net) 
+        f_h1_hist = [d["frequency"] for d in f_hist if self.h1_ip in d.values()]
+        f_h2_hist = [d["frequency"] for d in f_hist if self.h2_ip in d.values()]
+
+        h1avg = self._is_hist_down(h1_hist) 
+        h2avg = self._is_hist_down(h2_hist) 
+        
+        f_h1avg = self._is_hist_down(f_h1_hist) 
+        f_h2avg = self._is_hist_down(f_h2_hist) 
+
+
+
+
+        if (h1avg > 2 and f_h1avg >= h1avg): 
+            h1up =1
+        if (h2avg > 5 and f_h2avg >= h2avg):
+            h2up =1
+
+        print (h1up) 
+        print( h2up ) 
+        
+        if (h1up ==1 and h2up ==1):
+            return 0 
+        if (h1up ==1 and h2up ==0): 
+            return 1 
+        if (h1up==0 and h2up ==0): 
+            return 3 
+        return 2 
+        #return 0 #int(self._is_hist_down(h1_hist)) * 1 + \
+               #int(self._is_hist_down(h2_hist) * 2)
 
     def get_ids_ips_occurrences(self):
         return self._get_ids_ips_occurrences("ids"), self._get_ids_ips_occurrences("ips")
@@ -122,18 +171,24 @@ class GigiAgent(object):
         """
         qos_data = self._fetch_qos()
         attack_data = self._fetch_attack_stats()
+        
+        #print (attack_data) 
 
         avg = lambda l: sum(l) / len(l)
         nw_score = lambda l: avg([self._qos_index(d) for d in l])
+        failrate = lambda stat: re.match(r"failure rate\s*=\s*(.+)", stat).group(1).replace(",", ".")
 
-        failrate = lambda stat: re.match(r"failure rate\s*=\s*(.+)f\s*,", stat).group(1).replace(",", ".")
+
         attack_score = avg([float(failrate(d["stats"])) for d in attack_data])
 
         scale = lambda x: -1 + 1.3 * (x+1)
+
 
         return scale(nw_score(qos_data["benign"]) - nw_score(qos_data["malicious"]) + 1.6 * attack_score)
 
 
 if __name__ == "__main__":
-    agent = GigiAgent(None, None)
-    print(agent.toggle("bella-h1"))
+    agent = GigiAgent("210.0.0.101", "210.0.0.102")
+#    h = agent._fetch_hist("ids") 
+#    print (h) 
+    agent.get_ids_ips_occurrences()
