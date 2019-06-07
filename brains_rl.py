@@ -156,7 +156,8 @@ def reward():
 	# 1 for h2 QOS good and h1 QOS bad 
 	# -0.3 for QOS bad for both or QOS good for both
 	#-1 for h1 QOS good and h2 QOS bad
-	score+= a.get_reward()   
+        score+= a.get_reward() 
+        print(score) 
 	for (i, j, c, w) in specials: 
 		if state == (i,j):
 			score += w
@@ -188,7 +189,7 @@ def do_action(action):
     #elif action == actions[3]:
     #    World.try_move(1, 0)
     else:
-        print ("STATE= do nothing" )
+        print ("do nothing" )
     s2 = update_state() 
     r += score
     return s, action, r, s2
