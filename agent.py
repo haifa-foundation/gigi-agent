@@ -139,9 +139,9 @@ class GigiAgent(object):
 
 
 
-        if (h1avg > 2 and f_h1avg >= h1avg): 
+        if (h1avg > 2 ):#and f_h1avg >= h1avg): 
             h1up =1
-        if (h2avg > 5 and f_h2avg >= h2avg):
+        if (h2avg > 5):# and f_h2avg >= h2avg):
             h2up =1
 
         print (h1up) 

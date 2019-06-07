@@ -13,13 +13,17 @@ init_VN_h2="VNB"
 h1_oip= "210.0.0.101"
 h1_pip= "10.142.0.35" 
 h1_name="rbc-h1" 
+h1_mac="0a:a5:a2:89:82:60" 
 
 #h2 is benign 
 h2_oip= "210.0.0.102"
 h2_pip= "10.142.0.36"
 h2_name="rbc-h2"
+h2_mac="6e:9e:36:73:3b:10"
+
 
 a=GigiAgent(h1_oip, h2_oip) 
+
 #both start on vnb 
 ''' --- STATES ---
 
