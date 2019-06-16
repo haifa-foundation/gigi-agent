@@ -216,7 +216,8 @@ class GigiAgent(object):
         attack_score = avg([float(failrate(d["stats"])) for d in attack_data])
         print(attack_score) 
         scale = lambda x: -1 + 1.3 * (x+1)
-
+        print (scale(nw_score(qos_data["benign"]) - nw_score(qos_data["malicious"]) + 1.6 * attack_score))
+        print (qos_data["benign"])
 
         return scale(nw_score(qos_data["benign"]) - nw_score(qos_data["malicious"]) + 1.6 * attack_score)
 
