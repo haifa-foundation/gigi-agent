@@ -197,15 +197,24 @@ class GigiAgent(object):
         qos_data = self._fetch_qos()
         attack_data = self._fetch_attack_stats()
         
-        #print (attack_data) 
 
         avg = lambda l: sum(l) / len(l)
         nw_score = lambda l: avg([self._qos_index(d) for d in l])
         failrate = lambda stat: re.match(r"failure rate\s*=\s*(.+)", stat).group(1).replace(",", ".")
-
+       # iman_sucks = scipy.stats.hmean(failrate(d["stats"]) for d in attack_data) 
+        
+        
+        # 8==D step one: attack prevention rate := 1 - attack success rate => p1, p2, p3, ...
+        # 8==D step two: normalize QoS to a reasonable range => q1, q2, q3, ...
+        # 8==D step three: reward = hmean(p1, ..., q1, ...)
+        
+        
+        
+        print (qos_data)
+        print("===============")                               
 
         attack_score = avg([float(failrate(d["stats"])) for d in attack_data])
-
+        print(attack_score) 
         scale = lambda x: -1 + 1.3 * (x+1)
 
 
@@ -214,9 +223,10 @@ class GigiAgent(object):
 
 if __name__ == "__main__":
     agent = GigiAgent("210.0.0.101", "210.0.0.102")
+    agent.get_reward() 
 #    h = agent._fetch_hist("ids") 
 #    print (h) 
-    print( agent.get_ids_ips_occurrences())
+#   print( agent.get_ids_ips_occurrences())
     #print ("=================== TOGGLE H1 ==============") 
     #agent.toggle("0a:a5:a2:89:82:60")
     #print ("=================== TOGGLE DONE ==============") 
