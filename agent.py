@@ -7,6 +7,7 @@ import logging
 from config import UPDATE_FREQUENCY, HALSEY_API_URL
 from utils import loge, logi
 import time
+import scipy.stats
 import requests
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -201,25 +202,39 @@ class GigiAgent(object):
         avg = lambda l: sum(l) / len(l)
         nw_score = lambda l: avg([self._qos_index(d) for d in l])
         failrate = lambda stat: re.match(r"failure rate\s*=\s*(.+)", stat).group(1).replace(",", ".")
-       # iman_sucks = scipy.stats.hmean(failrate(d["stats"]) for d in attack_data) 
         
         
         # 8==D step one: attack prevention rate := 1 - attack success rate => p1, p2, p3, ...
-        # 8==D step two: normalize QoS to a reasonable range => q1, q2, q3, ...
+        # 8==D step two: normalize QoS to a reasonable range => q1, q2, q3, ... (qos range is time in ms so it has no range really) 
         # 8==D step three: reward = hmean(p1, ..., q1, ...)
+        
+        attack_score = avg([float(failrate(d["stats"])) for d in attack_data])
+		
+		#p1 = attack_score # range of this is 0-1 
+		#attack_data = self._fetch_attack_stats()
+		#attack_score = avg([float(failrate(d["stats"])) for d in attack_data]) 
+		#p2 = attack_score
+		
+		
         
         
         
         print (qos_data)
         print("===============")                               
 
-        attack_score = avg([float(failrate(d["stats"])) for d in attack_data])
-        print(attack_score) 
+        attack_fail_rate= attack_score
+        
+        total_qos = float(qos_data["benign"][0]["insight"]) - float(qos_data["malicious"][0]["insight"]) #-2 +2 
+        qos_rate =  (total_qos +2) / (2+2)  #normalized = (x-min(x))/(max(x)-min(x))
+       # print(qos_rate,attack_fail_rate)
+        rtrn = scipy.stats.hmean([qos_rate,attack_fail_rate]) 
+        print (rtrn) 
+       
         scale = lambda x: -1 + 1.3 * (x+1)
-        print (scale(nw_score(qos_data["benign"]) - nw_score(qos_data["malicious"]) + 1.6 * attack_score))
-        print (qos_data["benign"])
+			
 
-        return scale(nw_score(qos_data["benign"]) - nw_score(qos_data["malicious"]) + 1.6 * attack_score)
+		
+        return rtrn #scale(nw_score(qos_data["benign"]) - nw_score(qos_data["malicious"]) + 1.6 * attack_score)
 
 
 if __name__ == "__main__":
